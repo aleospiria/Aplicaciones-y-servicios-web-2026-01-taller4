@@ -21,12 +21,16 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 ### Issues completados
 
 | Issue | Descripción | Estado |
-|---|---|---|
+|---|---|---|---|
 | #1 | Estructura de carpetas del backend | ✅ Cerrado |
 | #2 | READMEs y documentación inicial | ✅ Cerrado |
 | #3 | Configurar conexión a base de datos | ✅ Cerrado |
 | #4 | Crear modelos ORM | ✅ Cerrado |
-| #5 | Crear esquemas Pydantic | 🔄 En progreso |
+| #5 | Crear esquemas Pydantic | ✅ Cerrado |
+| #6 | Autenticación JWT (security, jwt, roles) | ✅ Cerrado |
+| #8 | CRUD de usuarios, espacios y reservas | ✅ Cerrado |
+| #7 | Endpoint de autenticación | 🔄 Pendiente |
+| #9–11 | Endpoints de usuarios, espacios y reservas | 🔄 Pendiente |
 
 ---
 
@@ -69,13 +73,14 @@ app/
 │   └── reserva.py     # ReservaCreate, ReservaOut
 ├── crud/              # Operaciones CRUD
 │   ├── __init__.py
-│   ├── usuarios.py
-│   ├── espacios.py
-│   └── reservas.py
-├── auth/              # Autenticación y seguridad
+│   ├── usuarios.py    # CRUD Usuario (get, create, update, delete)
+│   ├── espacios.py    # CRUD Espacio (get, create, update, delete)
+│   └── reservas.py    # CRUD Reserva (get, create, update, delete)
+├── auth/              # Autenticación, autorización y seguridad
 │   ├── __init__.py
-│   ├── jwt.py         # Crear y validar tokens JWT
-│   └── security.py    # Hash contraseñas, dependencias
+│   ├── security.py    # hash_password(), verify_password() con bcrypt
+│   ├── jwt.py         # create_access_token(), get_current_user()
+│   └── roles.py       # admin_required(), usuario_required()
 ├── db.py              # Conexión a PostgreSQL (engine, SessionLocal, Base, get_db)
 └── main.py            # Punto de entrada FastAPI
 ```
@@ -93,10 +98,10 @@ Se utilizó PostgreSQL 17 instalado localmente con pgAdmin para gestión visual.
 - Base de datos: `reservas_db`
 - Usuario: `postgres`
 
-**.env.example:**
-el archivo **.env** que usaremos es el siguiente mientras se desarrolla todo (de forma local) antes de desplegarlo, luego debemos poner totalmente secreto mediante el .env la URL.
+**.env:**
 ```
 DATABASE_URL=postgresql://postgres:password@localhost:5432/reservas_db
+SECRET_KEY=dev-secret-key-change-in-production
 ```
 
 ### 2. Conexión desde Python (`app/db.py`)
@@ -157,6 +162,41 @@ Tres modelos que reflejan el modelo de datos del laboratorio:
 | hora_fin | Time | No nulo |
 | cantidad_asistentes | Integer | No nulo |
 | estado | String(20) | `esperando`, `aprobada`, `rechazada` (default `esperando`) |
+
+### 4. Autenticación y autorización (`app/auth/`)
+
+Tres archivos que gestionan la seguridad del sistema:
+
+**`security.py`** — Hash de contraseñas con bcrypt:
+- `hash_password("pass")` → retorna el hash
+- `verify_password("pass", "hash")` → retorna True/False
+
+**`jwt.py`** — Tokens JWT:
+- `create_access_token({"sub": id, "rol": "admin"})` → genera un token firmado con `SECRET_KEY`, expira en 60 min
+- `get_current_user` → extrae el token del header `Authorization: Bearer <token>`, lo decodifica y retorna el usuario autenticado
+
+**`roles.py`** — Control de acceso por rol:
+- `admin_required` → solo permite `admin`
+- `usuario_required` → permite `admin` y `usuario`
+
+Uso en endpoints:
+```python
+@app.get("/espacios")
+def listar_espacios(admin: Usuario = Depends(admin_required)):
+    ...
+```
+
+### 5. Operaciones CRUD (`app/crud/`)
+
+Cada entidad tiene su archivo con operaciones estándar:
+
+| Archivo | Funciones |
+|---|---|
+| `usuarios.py` | `get_usuario`, `get_usuarios`, `get_usuario_por_correo`, `create_usuario` (hashea contraseña automáticamente), `update_usuario`, `delete_usuario` |
+| `espacios.py` | `get_espacio`, `get_espacios`, `get_espacios_activos`, `create_espacio`, `update_espacio`, `delete_espacio` |
+| `reservas.py` | `get_reserva`, `get_reservas`, `get_reservas_por_usuario`, `create_reserva`, `update_reserva`, `delete_reserva` |
+
+Todas reciben `db: Session` y retornan el modelo o `None` si no existe.
 
 ---
 
