@@ -29,8 +29,11 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 | #5 | Crear esquemas Pydantic | ✅ Cerrado |
 | #6 | Autenticación JWT (security, jwt, roles) | ✅ Cerrado |
 | #8 | CRUD de usuarios, espacios y reservas | ✅ Cerrado |
-| #7 | Endpoint de autenticación | 🔄 Pendiente |
-| #9–11 | Endpoints de usuarios, espacios y reservas | 🔄 Pendiente |
+| #7 | Endpoint de autenticación | ✅ Cerrado |
+| #9 | Endpoints de usuarios | ✅ Cerrado |
+| #10 | Endpoints de espacios | ✅ Cerrado |
+| #11 | Endpoints de reservas + reglas de negocio | 🔄 Pendiente |
+| #12 | Punto de entrada y configuración (main.py) | 🔄 Pendiente |
 
 ---
 
@@ -57,9 +60,9 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 app/
 ├── api/               # Endpoints (routers)
 │   ├── __init__.py
-│   ├── auth.py        # Login / registro
-│   ├── usuarios.py    # CRUD usuarios
-│   ├── espacios.py    # CRUD espacios
+│   ├── auth.py        # POST /register, POST /login
+│   ├── usuarios.py    # CRUD usuarios (solo admin)
+│   ├── espacios.py    # GET público, POST/PUT/DELETE solo admin
 │   └── reservas.py    # CRUD reservas + reglas de negocio
 ├── models/            # Modelos ORM
 │   ├── __init__.py
@@ -70,7 +73,8 @@ app/
 │   ├── __init__.py
 │   ├── usuario.py     # UsuarioCreate, UsuarioOut
 │   ├── espacio.py     # EspacioCreate, EspacioOut
-│   └── reserva.py     # ReservaCreate, ReservaOut
+│   ├── reserva.py     # ReservaCreate, ReservaOut
+│   └── auth.py        # LoginRequest, TokenResponse
 ├── crud/              # Operaciones CRUD
 │   ├── __init__.py
 │   ├── usuarios.py    # CRUD Usuario (get, create, update, delete)
@@ -197,6 +201,23 @@ Cada entidad tiene su archivo con operaciones estándar:
 | `reservas.py` | `get_reserva`, `get_reservas`, `get_reservas_por_usuario`, `create_reserva`, `update_reserva`, `delete_reserva` |
 
 Todas reciben `db: Session` y retornan el modelo o `None` si no existe.
+
+### 6. API Endpoints
+
+| Archivo | Endpoint | Método | Acceso | Descripción |
+|---|---|---|---|---|
+| `auth.py` | `/auth/register` | POST | Público | Registrar nuevo usuario |
+| | `/auth/login` | POST | Público | Iniciar sesión, retorna JWT |
+| `usuarios.py` | `/usuarios/` | GET | Admin | Listar usuarios |
+| | `/usuarios/{id}` | GET | Admin | Obtener usuario |
+| | `/usuarios/` | POST | Admin | Crear usuario |
+| | `/usuarios/{id}` | PUT | Admin | Actualizar usuario |
+| | `/usuarios/{id}` | DELETE | Admin | Eliminar usuario |
+| `espacios.py` | `/espacios/` | GET | Autenticado | Listar espacios |
+| | `/espacios/{id}` | GET | Autenticado | Obtener espacio |
+| | `/espacios/` | POST | Admin | Crear espacio |
+| | `/espacios/{id}` | PUT | Admin | Actualizar espacio |
+| | `/espacios/{id}` | DELETE | Admin | Eliminar espacio |
 
 ---
 
