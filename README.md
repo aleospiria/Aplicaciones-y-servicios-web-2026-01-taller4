@@ -32,8 +32,8 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 | #7 | Endpoint de autenticación | ✅ Cerrado |
 | #9 | Endpoints de usuarios | ✅ Cerrado |
 | #10 | Endpoints de espacios | ✅ Cerrado |
-| #11 | Endpoints de reservas + reglas de negocio | 🔄 Pendiente |
-| #12 | Punto de entrada y configuración (main.py) | 🔄 Pendiente |
+| #11 | Endpoints de reservas + reglas de negocio | ✅ Cerrado |
+| #12 | Punto de entrada y configuración (main.py) | ✅ Cerrado |
 
 ---
 
@@ -218,6 +218,48 @@ Todas reciben `db: Session` y retornan el modelo o `None` si no existe.
 | | `/espacios/` | POST | Admin | Crear espacio |
 | | `/espacios/{id}` | PUT | Admin | Actualizar espacio |
 | | `/espacios/{id}` | DELETE | Admin | Eliminar espacio |
+| `reservas.py` | `/reservas/` | GET | Autenticado | Admin ve todas, usuario ve las suyas |
+| | `/reservas/{id}` | GET | Autenticado | Ver reserva (usuario solo la suya) |
+| | `/reservas/` | POST | Autenticado | Crear reserva (con reglas de negocio) |
+| | `/reservas/{id}/estado` | PUT | Admin | Aprobar o rechazar reserva |
+| | `/reservas/{id}` | DELETE | Autenticado | Cancelar reserva |
+
+### 7. Punto de entrada (`app/main.py`)
+
+El archivo `main.py` arranca la aplicación FastAPI y configura:
+
+- **Creación automática de tablas:** `Base.metadata.create_all(bind=engine)` crea las tablas en PostgreSQL si no existen al iniciar
+- **CORS:** Middleware que permite peticiones desde cualquier origen (`*`) para que el frontend pueda consumir la API sin importar desde dónde se sirva
+- **Routers:** Se incluyen los 4 módulos de endpoints:
+  - `auth.router` → `/auth/*`
+  - `usuarios.router` → `/usuarios/*`
+  - `espacios.router` → `/espacios/*`
+  - `reservas.router` → `/reservas/*`
+
+Inicio del servidor:
+```bash
+uvicorn app.main:app --reload
+```
+
+Documentación automática disponible en:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+### 8. Reglas de negocio implementadas
+
+Validadas al crear o modificar reservas en `api/reservas.py`:
+
+| ID | Regla | Validación |
+|---|---|---|
+| A | Solo autenticados pueden crear reservas | `usuario_required` en POST |
+| B | Solo admin puede aprobar/rechazar | `admin_required` en PUT /estado |
+| C | Sin reservas superpuestas | Query SQL: mismo espacio, fecha y horarios se cruzan; solo `esperando`/`aprobada` bloquean |
+| D | Mínimo 24h de anticipación | `fecha + hora_inicio >= now + 24h` |
+| E | Horario permitido | L-V 7:00–20:00, Sáb 8:00–12:00, Dom prohibido |
+| F | Hora inicio < hora fin | Comparación directa |
+| G | No espacios inactivos | Estado debe ser `activo` |
+| H | Capacidad máxima | `asistentes <= espacio.capacidad` |
+| I | Estado inicial `esperando` | Solo admin cambia a `aprobada`/`rechazada` |
 
 ---
 
