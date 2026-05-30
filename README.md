@@ -21,6 +21,15 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 ### Issues completados
 
 | Issue | Descripción | Estado |
+|---|---|---|
+| #1–#12 | Backend completo (FastAPI + PostgreSQL) | ✅ Cerrado |
+| #13 | Frontend: Login y autenticación | 🔄 Pendiente |
+| #14 | Frontend: Vistas de usuario | 🔄 Pendiente |
+| #15 | Frontend: Vistas de administrador | 🔄 Pendiente |
+
+### Issues en progreso (Frontend 🔄)
+
+| Issue | Descripción | Estado |
 |---|---|---|---|
 | #1 | Estructura de carpetas del backend | ✅ Cerrado |
 | #2 | READMEs y documentación inicial | ✅ Cerrado |
@@ -86,7 +95,16 @@ app/
 │   ├── jwt.py         # create_access_token(), get_current_user()
 │   └── roles.py       # admin_required(), usuario_required()
 ├── db.py              # Conexión a PostgreSQL (engine, SessionLocal, Base, get_db)
-└── main.py            # Punto de entrada FastAPI
+├── main.py            # Punto de entrada FastAPI
+frontend/
+├── src/
+│   ├── components/    # Componentes reutilizables
+│   ├── pages/         # Páginas de la aplicación
+│   ├── services/      # Llamadas a la API
+│   ├── App.jsx        # Router principal
+│   └── main.jsx       # Punto de entrada React
+├── package.json
+└── vite.config.js     # Proxy al backend
 ```
 
 ---
@@ -245,7 +263,37 @@ Documentación automática disponible en:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-### 8. Reglas de negocio implementadas
+### 8. Frontend — React + Vite
+
+El frontend se desarrolla con **React 19 + Vite**, dentro de la carpeta `frontend/`.
+
+**Tecnologías:**
+| Herramienta | Propósito |
+|---|---|
+| React | Framework de componentes UI |
+| Vite | Bundler y servidor de desarrollo |
+| React Router DOM | Navegación entre pantallas |
+| CSS puro | Estilos (sin framework adicional) |
+
+**Integración con el backend:**
+- En desarrollo, Vite tiene un proxy configurado (`vite.config.js`) que redirige peticiones `/auth/*`, `/usuarios/*`, `/espacios/*` y `/reservas/*` al backend en `http://localhost:8000`
+- Esto evita problemas de CORS al correr frontend y backend en puertos distintos
+- En producción (Docker Compose), ambos servicios se comunican mediante la red interna de Docker
+
+**Estructura del frontend:**
+```
+frontend/
+├── src/
+│   ├── components/     # Componentes reutilizables (Navbar, ProtectedRoute, etc.)
+│   ├── pages/          # Páginas (Login, Espacios, MisReservas, Admin, etc.)
+│   ├── services/       # Llamadas a la API (authService, api.js)
+│   ├── App.jsx         # Router principal
+│   └── main.jsx        # Punto de entrada
+├── package.json
+└── vite.config.js      # Configuración con proxy al backend
+```
+
+### 9. Reglas de negocio implementadas
 
 Validadas al crear o modificar reservas en `api/reservas.py`:
 
@@ -265,6 +313,8 @@ Validadas al crear o modificar reservas en `api/reservas.py`:
 
 ## Cómo ejecutar en modo desarrollo
 
+### Backend
+
 ```bash
 # 1. Activar entorno virtual
 .\venv\Scripts\activate
@@ -278,8 +328,23 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-La documentación automática de la API estará disponible en:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+Documentación automática: `http://localhost:8000/docs`
+
+### Frontend
+
+```bash
+# 1. Entrar a la carpeta del frontend
+cd frontend
+
+# 2. Instalar dependencias (solo la primera vez)
+npm install
+
+# 3. Iniciar servidor de desarrollo
+npm run dev
+```
+
+Frontend disponible en: `http://localhost:5173`
+
+> El proxy de Vite redirige automáticamente las llamadas a la API al backend (puerto 8000), por lo que no hay conflictos de CORS en desarrollo.
 
 ---
