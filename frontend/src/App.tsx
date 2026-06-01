@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Espacios from "./pages/Espacios";
+import CrearReserva from "./pages/CrearReserva";
+import MisReservas from "./pages/MisReservas";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -11,10 +13,26 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/dashboard"
+          path="/espacios"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Espacios />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crear-reserva"
+          element={
+            <ProtectedRoute>
+              <CrearReserva />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mis-reservas"
+          element={
+            <ProtectedRoute>
+              <MisReservas />
             </ProtectedRoute>
           }
         />
