@@ -25,7 +25,7 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 | #1–#12 | Backend completo (FastAPI + PostgreSQL) | ✅ Cerrado |
 | #13 | Frontend: Login y autenticación | ✅ Cerrado |
 | #14 | Frontend: Vistas de usuario (Espacios, Crear Reserva, Mis Reservas) | ✅ Cerrado |
-| #15 | Frontend: Vistas de administrador | 🔄 Pendiente |
+| #15 | Frontend: Vistas de administrador (GestionarEspacios, TodasReservas, AprobarReservas) | ✅ Cerrado |
 
 ---
 
@@ -323,7 +323,15 @@ frontend/
 | `/crear-reserva` | `CrearReserva.tsx` | Formulario: espacio, fecha, hora inicio/fin, asistentes |
 | `/mis-reservas` | `MisReservas.tsx` | Listado de reservas con badges de estado + cancelación |
 
-> 🔜 **Vistas de administrador** (próximo issue): GestionarEspacios, TodasReservas, AprobarReservas
+**Páginas de administrador:**
+
+| Ruta | Componente | Descripción |
+|---|---|---|
+| `/admin/gestionar-espacios` | `GestionarEspacios.tsx` | CRUD completo: tabla de espacios + formulario inline |
+| `/admin/todas-reservas` | `TodasReservas.tsx` | Tabla completa de todas las reservas del sistema |
+| `/admin/aprobar-reservas` | `AprobarReservas.tsx` | Tarjetas de aprobación + historial en tabla |
+
+> La navegación entre vistas de usuario y administrador es automática: el `Navbar` cambia sus tabs según el `rol` almacenado en `localStorage` al iniciar sesión.
 
 **Capturas de pantalla:**
 
@@ -342,6 +350,18 @@ frontend/
 > *Mis reservas*
 >
 > ![Mis Reservas](URL_IMAGEN_MIS_RESERVAS)
+>
+> *Gestionar espacios — Admin*
+>
+> ![Gestionar Espacios](URL_IMAGEN_GESTIONAR_ESPACIOS)
+>
+> *Todas las reservas — Admin*
+>
+> ![Todas las Reservas](URL_IMAGEN_TODAS_RESERVAS)
+>
+> *Aprobar reservas — Admin*
+>
+> ![Aprobar Reservas](URL_IMAGEN_APROBAR_RESERVAS)
 
 ### 9. Reglas de negocio implementadas
 
@@ -358,6 +378,50 @@ Validadas al crear o modificar reservas en `api/reservas.py`:
 | G | No espacios inactivos | Estado debe ser `activo` |
 | H | Capacidad máxima | `asistentes <= espacio.capacidad` |
 | I | Estado inicial `esperando` | Solo admin cambia a `aprobada`/`rechazada` |
+
+---
+
+## Bugs encontrados y soluciones
+
+### 1. bcrypt 5.x incompatible con passlib
+
+| Ítem | Detalle |
+|---|---|
+| **Síntoma** | `(trapped) error reading bcrypt version` al iniciar el servidor, falla el hash de contraseñas |
+| **Causa** | `passlib==1.7.4` no es compatible con `bcrypt>=5.0`; la API interna de bcrypt cambió (`__about__` eliminado) |
+| **Solución** | Pinear `bcrypt==4.1.3` en `requirements.txt` como dependencia directa |
+| **Commit** | `0c05bd7` |
+| **Archivo** | `requirements.txt` |
+
+### 2. python-jose exige `sub` como string
+
+| Ítem | Detalle |
+|---|---|
+| **Síntoma** | `POST /auth/login` retorna 200 con token, pero cualquier endpoint protegido devuelve `401 Token inválido o expirado` |
+| **Causa** | `python-jose==3.5.0` valida que el claim `sub` sea estrictamente `string`; el backend pasaba `id_usuario` (int). El error real (`JWTClaimsError: Subject must be a string`) era capturado como `JWTError` genérico |
+| **Solución** | En `create_access_token()` convertir `sub` a string antes de firmar; en `get_current_user()` convertir `sub` de vuelta a `int` para la consulta SQL |
+| **Commit** | `9e94a85` |
+| **Archivo** | `app/auth/jwt.py` |
+
+### 3. Schema ReservaCreate exigía `id_usuario` en el body
+
+| Ítem | Detalle |
+|---|---|
+| **Síntoma** | `POST /reservas/` retorna `422 Field required` por `id_usuario` |
+| **Causa** | El endpoint asigna `reserva_data.id_usuario = current_user.id_usuario`, pero Pydantic validaba `id_usuario` como campo obligatorio antes de que el endpoint pudiera modificarlo |
+| **Solución** | Hacer `id_usuario: int \| None = None` en `ReservaCreate`, permitiendo que el frontend omita el campo |
+| **Commit** | `860ddc8` |
+| **Archivo** | `app/schemas/reserva.py` |
+
+### 4. Timezone bug al mostrar fechas en el frontend
+
+| Ítem | Detalle |
+|---|---|
+| **Síntoma** | Al seleccionar una fecha (ej. 4 de junio), la UI muestra el día anterior (3 de junio) |
+| **Causa** | `new Date("2026-06-04").toLocaleDateString("es-CO")` interpreta el string ISO como UTC medianoche y lo convierte a UTC-5 (Colombia), desplazando un día atrás |
+| **Solución** | Reemplazar por `formatDate(fecha)` que parsea el string ISO directamente sin conversión de zona horaria: `const [y, m, d] = dateStr.split("-"); return \`${d}/${m}/${y}\`` |
+| **Commits** | `e832347` |
+| **Archivos** | `MisReservas.tsx`, `TodasReservas.tsx`, `AprobarReservas.tsx` |
 
 ---
 
