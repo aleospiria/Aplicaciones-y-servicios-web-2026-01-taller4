@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const rol = localStorage.getItem("rol");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -10,10 +11,18 @@ function Navbar() {
     navigate("/login");
   };
 
-  const tabs = [
+  const userTabs = [
     { path: "/espacios", label: "Espacios" },
     { path: "/mis-reservas", label: "Mis Reservas" },
   ];
+
+  const adminTabs = [
+    { path: "/admin/gestionar-espacios", label: "Gestionar Espacios" },
+    { path: "/admin/todas-reservas", label: "Todas las Reservas" },
+    { path: "/admin/aprobar-reservas", label: "Aprobar Reservas" },
+  ];
+
+  const tabs = rol === "admin" ? adminTabs : userTabs;
 
   return (
     <nav className="navbar">

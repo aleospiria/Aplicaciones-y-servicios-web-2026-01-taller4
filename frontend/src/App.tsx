@@ -4,6 +4,9 @@ import Register from "./pages/Register";
 import Espacios from "./pages/Espacios";
 import CrearReserva from "./pages/CrearReserva";
 import MisReservas from "./pages/MisReservas";
+import GestionarEspacios from "./pages/GestionarEspacios";
+import TodasReservas from "./pages/TodasReservas";
+import AprobarReservas from "./pages/AprobarReservas";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -33,6 +36,30 @@ function App() {
           element={
             <ProtectedRoute>
               <MisReservas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/gestionar-espacios"
+          element={
+            <ProtectedRoute>
+              <GestionarEspacios />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/todas-reservas"
+          element={
+            <ProtectedRoute>
+              <TodasReservas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/aprobar-reservas"
+          element={
+            <ProtectedRoute>
+              <AprobarReservas />
             </ProtectedRoute>
           }
         />
