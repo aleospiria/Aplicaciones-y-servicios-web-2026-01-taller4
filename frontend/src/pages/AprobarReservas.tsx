@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import Navbar from "../components/Navbar";
 
+function formatDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+}
+
 interface Reserva {
   id_reserva: number;
   id_usuario: number;
@@ -127,7 +132,7 @@ function AprobarReservas() {
                       <line x1="8" y1="2" x2="8" y2="6" />
                       <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
-                    <span>{new Date(r.fecha).toLocaleDateString("es-CO")}</span>
+                    <span>{formatDate(r.fecha)}</span>
                   </div>
                   <div className="reserva-detail">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
@@ -194,7 +199,7 @@ function AprobarReservas() {
                       <td>{r.id_reserva}</td>
                       <td>{getNombreUsuario(r.id_usuario)}</td>
                       <td>{getNombreEspacio(r.id_espacio)}</td>
-                      <td>{new Date(r.fecha).toLocaleDateString("es-CO")}</td>
+                      <td>{formatDate(r.fecha)}</td>
                       <td>
                         {r.hora_inicio.slice(0, 5)} - {r.hora_fin.slice(0, 5)}
                       </td>
