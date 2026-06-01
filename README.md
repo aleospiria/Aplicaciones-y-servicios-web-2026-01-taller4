@@ -23,26 +23,9 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 | Issue | Descripción | Estado |
 |---|---|---|
 | #1–#12 | Backend completo (FastAPI + PostgreSQL) | ✅ Cerrado |
-| #13 | Frontend: Login y autenticación | 🔄 Pendiente |
-| #14 | Frontend: Vistas de usuario | 🔄 Pendiente |
+| #13 | Frontend: Login y autenticación | ✅ Cerrado |
+| #14 | Frontend: Vistas de usuario (Espacios, Crear Reserva, Mis Reservas) | ✅ Cerrado |
 | #15 | Frontend: Vistas de administrador | 🔄 Pendiente |
-
-### Issues en progreso (Frontend 🔄)
-
-| Issue | Descripción | Estado |
-|---|---|---|---|
-| #1 | Estructura de carpetas del backend | ✅ Cerrado |
-| #2 | READMEs y documentación inicial | ✅ Cerrado |
-| #3 | Configurar conexión a base de datos | ✅ Cerrado |
-| #4 | Crear modelos ORM | ✅ Cerrado |
-| #5 | Crear esquemas Pydantic | ✅ Cerrado |
-| #6 | Autenticación JWT (security, jwt, roles) | ✅ Cerrado |
-| #8 | CRUD de usuarios, espacios y reservas | ✅ Cerrado |
-| #7 | Endpoint de autenticación | ✅ Cerrado |
-| #9 | Endpoints de usuarios | ✅ Cerrado |
-| #10 | Endpoints de espacios | ✅ Cerrado |
-| #11 | Endpoints de reservas + reglas de negocio | ✅ Cerrado |
-| #12 | Punto de entrada y configuración (main.py) | ✅ Cerrado |
 
 ---
 
@@ -50,7 +33,7 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 
 | Herramienta | Versión | Propósito |
 |---|---|---|
-| Python | 3.11 | Lenguaje base |
+| Python | 3.11 | Lenguaje base (backend) |
 | FastAPI | 0.136.3 | Framework web ASGI |
 | SQLAlchemy | 2.0.50 | ORM para base de datos |
 | PostgreSQL | 17 | Base de datos relacional |
@@ -58,8 +41,11 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 | python-jose | 3.5.0 | JWT (autenticación) |
 | passlib | 1.7.4 | Hash de contraseñas (bcrypt) |
 | python-dotenv | 1.2.2 | Variables de entorno |
-| python-multipart | 0.0.29 | Soporte para formularios |
-| Pydantic | 2.13.4 | Validación de datos |
+| bcrypt | 4.1.3 | Algoritmo de hash (pinned) |
+| React | 19 | Frontend — componentes UI |
+| Vite | 8 | Bundler y dev server |
+| TypeScript | 5.8 | Tipado estático |
+| React Router DOM | 7 | Navegación SPA |
 
 ---
 
@@ -67,44 +53,53 @@ El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
 
 ```
 app/
-├── api/               # Endpoints (routers)
+├── api/                  # Endpoints (routers)
 │   ├── __init__.py
-│   ├── auth.py        # POST /register, POST /login
-│   ├── usuarios.py    # CRUD usuarios (solo admin)
-│   ├── espacios.py    # GET público, POST/PUT/DELETE solo admin
-│   └── reservas.py    # CRUD reservas + reglas de negocio
-├── models/            # Modelos ORM
+│   ├── auth.py           # POST /register, POST /login
+│   ├── usuarios.py       # CRUD usuarios (solo admin)
+│   ├── espacios.py       # GET autenticado, POST/PUT/DELETE solo admin
+│   └── reservas.py       # CRUD reservas + reglas de negocio (C–I)
+├── models/               # Modelos ORM
 │   ├── __init__.py
-│   ├── usuario.py     # Usuario (id, nombre, correo, contraseña, rol)
-│   ├── espacio.py     # Espacio (id, nombre, ubicacion, capacidad, estado)
-│   └── reserva.py     # Reserva (id, FK usuario/espacio, fecha, hora, asistentes, estado)
-├── schemas/           # Esquemas Pydantic
+│   ├── usuario.py        # id, nombre, correo, contraseña, rol
+│   ├── espacio.py        # id, nombre, ubicacion, capacidad, estado
+│   └── reserva.py        # id, FKs, fecha, hora_inicio, hora_fin, asistentes, estado
+├── schemas/              # Esquemas Pydantic
 │   ├── __init__.py
-│   ├── usuario.py     # UsuarioCreate, UsuarioOut
-│   ├── espacio.py     # EspacioCreate, EspacioOut
-│   ├── reserva.py     # ReservaCreate, ReservaOut
-│   └── auth.py        # LoginRequest, TokenResponse
-├── crud/              # Operaciones CRUD
+│   ├── usuario.py
+│   ├── espacio.py
+│   ├── reserva.py
+│   └── auth.py           # LoginRequest, TokenResponse
+├── crud/                 # Operaciones CRUD
 │   ├── __init__.py
-│   ├── usuarios.py    # CRUD Usuario (get, create, update, delete)
-│   ├── espacios.py    # CRUD Espacio (get, create, update, delete)
-│   └── reservas.py    # CRUD Reserva (get, create, update, delete)
-├── auth/              # Autenticación, autorización y seguridad
+│   ├── usuarios.py
+│   ├── espacios.py
+│   └── reservas.py
+├── auth/                 # Autenticación y autorización
 │   ├── __init__.py
-│   ├── security.py    # hash_password(), verify_password() con bcrypt
-│   ├── jwt.py         # create_access_token(), get_current_user()
-│   └── roles.py       # admin_required(), usuario_required()
-├── db.py              # Conexión a PostgreSQL (engine, SessionLocal, Base, get_db)
-├── main.py            # Punto de entrada FastAPI
+│   ├── security.py       # hash/verify con bcrypt
+│   ├── jwt.py            # create_access_token, get_current_user
+│   └── roles.py          # admin_required, usuario_required
+├── db.py                 # Engine, SessionLocal, Base, get_db
+├── main.py               # FastAPI app + CORS + routers
 frontend/
 ├── src/
-│   ├── components/    # Componentes reutilizables
-│   ├── pages/         # Páginas de la aplicación
-│   ├── services/      # Llamadas a la API
-│   ├── App.jsx        # Router principal
-│   └── main.jsx       # Punto de entrada React
+│   ├── components/
+│   │   ├── Navbar.tsx        # Navegación con tabs + logout
+│   │   └── ProtectedRoute.tsx
+│   ├── pages/
+│   │   ├── Login.tsx         # Inicio de sesión
+│   │   ├── Register.tsx      # Registro
+│   │   ├── Espacios.tsx      # Bento-grid de espacios
+│   │   ├── CrearReserva.tsx  # Formulario de reserva
+│   │   └── MisReservas.tsx   # Reservas del usuario
+│   ├── services/
+│   │   └── api.ts            # Cliente HTTP con JWT
+│   ├── App.tsx               # Router
+│   ├── main.tsx              # Entry point
+│   └── index.css             # Bento Box design system
 ├── package.json
-└── vite.config.js     # Proxy al backend
+└── vite.config.ts            # Proxy al backend
 ```
 
 ---
@@ -194,8 +189,8 @@ Tres archivos que gestionan la seguridad del sistema:
 - `verify_password("pass", "hash")` → retorna True/False
 
 **`jwt.py`** — Tokens JWT:
-- `create_access_token({"sub": id, "rol": "admin"})` → genera un token firmado con `SECRET_KEY`, expira en 60 min
-- `get_current_user` → extrae el token del header `Authorization: Bearer <token>`, lo decodifica y retorna el usuario autenticado
+- `create_access_token({"sub": id, "rol": "admin"})` → genera un token firmado con `SECRET_KEY`, expira en 60 min; convierte `sub` a string automáticamente (compatibilidad con `python-jose` 3.5.0)
+- `get_current_user` → extrae el token del header `Authorization: Bearer <token>`, lo decodifica, convierte `sub` a `int` y retorna el usuario autenticado
 
 **`roles.py`** — Control de acceso por rol:
 - `admin_required` → solo permite `admin`
@@ -265,18 +260,19 @@ Documentación automática disponible en:
 
 ### 8. Frontend — React + Vite
 
-El frontend se desarrolla con **React 19 + Vite**, dentro de la carpeta `frontend/`.
+El frontend se desarrolla con **React 19 + Vite + TypeScript**, dentro de la carpeta `frontend/`.
 
 **Tecnologías:**
-| Herramienta | Propósito |
-|---|---|
-| React | Framework de componentes UI |
-| Vite | Bundler y servidor de desarrollo |
-| React Router DOM | Navegación entre pantallas |
-| CSS puro | Estilos (sin framework adicional) |
+| Herramienta | Versión | Propósito |
+|---|---|---|
+| React | 19 | Framework de componentes UI |
+| Vite | 8 | Bundler y servidor de desarrollo |
+| React Router DOM | 7 | Navegación entre pantallas |
+| TypeScript | 5.8 | Tipado estático |
+| CSS puro | — | Estilos (sin framework adicional) |
 
 **Integración con el backend:**
-- En desarrollo, Vite tiene un proxy configurado (`vite.config.js`) que redirige peticiones `/auth/*`, `/usuarios/*`, `/espacios/*` y `/reservas/*` al backend en `http://localhost:8000`
+- En desarrollo, Vite tiene un proxy configurado (`vite.config.ts`) que redirige peticiones `/auth/*`, `/usuarios/*`, `/espacios/*` y `/reservas/*` al backend en `http://localhost:8000`
 - Esto evita problemas de CORS al correr frontend y backend en puertos distintos
 - En producción (Docker Compose), ambos servicios se comunican mediante la red interna de Docker
 
@@ -284,14 +280,68 @@ El frontend se desarrolla con **React 19 + Vite**, dentro de la carpeta `fronten
 ```
 frontend/
 ├── src/
-│   ├── components/     # Componentes reutilizables (Navbar, ProtectedRoute, etc.)
-│   ├── pages/          # Páginas (Login, Espacios, MisReservas, Admin, etc.)
-│   ├── services/       # Llamadas a la API (authService, api.js)
-│   ├── App.jsx         # Router principal
-│   └── main.jsx        # Punto de entrada
+│   ├── components/
+│   │   ├── Navbar.tsx           # Barra de navegación con tabs y logout
+│   │   └── ProtectedRoute.tsx   # Redirige a /login si no hay token
+│   ├── pages/
+│   │   ├── Login.tsx            # Inicio de sesión (decode JWT, guarda rol)
+│   │   ├── Register.tsx         # Registro de nuevo usuario
+│   │   ├── Espacios.tsx         # Bento-grid de espacios disponibles
+│   │   ├── CrearReserva.tsx     # Formulario de nueva reserva
+│   │   └── MisReservas.tsx      # Listado de reservas del usuario
+│   ├── services/
+│   │   └── api.ts               # Cliente HTTP con JWT automático
+│   ├── App.tsx                  # Router principal
+│   ├── main.tsx                 # Punto de entrada React
+│   └── index.css                # Estilos globales (Bento Box design)
+├── public/
 ├── package.json
-└── vite.config.js      # Configuración con proxy al backend
+├── vite.config.ts               # Proxy al backend en :8000
+└── tsconfig.json
 ```
+
+**Flujo de autenticación:**
+1. El usuario inicia sesión → el backend devuelve un JWT con `sub` (id) y `rol`
+2. El frontend decodifica el payload del JWT y guarda `token` y `rol` en `localStorage`
+3. Cada petición a la API incluye el header `Authorization: Bearer <token>`
+4. `ProtectedRoute` verifica que exista el token antes de renderizar cualquier página protegida
+5. `Navbar` lee el rol de `localStorage` para condicionar los tabs visibles
+
+**Diseño: Bento Box Grid**
+- **Paleta:** Navy `#0F172A` (navbar), Azul CTA `#0369A1` (botones), Fondo `#F8FAFC`
+- **Layout:** Grid asimétrico de tarjetas (`bento-card`) con sombras suaves y hover elevado
+- **Componentes:** `badge` para estados (warning/success/error), `form-card` para formularios, `reserva-card` para listado
+- **Responsive:** Adaptación a móvil con media queries (navbar colapsable, grid 1 columna)
+
+**Páginas de usuario:**
+
+| Ruta | Componente | Descripción |
+|---|---|---|
+| `/login` | `Login.tsx` | Formulario de inicio de sesión |
+| `/register` | `Register.tsx` | Formulario de registro |
+| `/espacios` | `Espacios.tsx` | Bento-grid de espacios disponibles con botón "Reservar" |
+| `/crear-reserva` | `CrearReserva.tsx` | Formulario: espacio, fecha, hora inicio/fin, asistentes |
+| `/mis-reservas` | `MisReservas.tsx` | Listado de reservas con badges de estado + cancelación |
+
+> 🔜 **Vistas de administrador** (próximo issue): GestionarEspacios, TodasReservas, AprobarReservas
+
+**Capturas de pantalla:**
+
+> *Login*
+>
+> ![Login](URL_IMAGEN_LOGIN)
+>
+> *Espacios disponibles — Bento Box Grid*
+>
+> ![Espacios](URL_IMAGEN_ESPACIOS)
+>
+> *Crear reserva*
+>
+> ![Crear Reserva](URL_IMAGEN_CREAR_RESERVA)
+>
+> *Mis reservas*
+>
+> ![Mis Reservas](URL_IMAGEN_MIS_RESERVAS)
 
 ### 9. Reglas de negocio implementadas
 
