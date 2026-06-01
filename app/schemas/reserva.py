@@ -12,7 +12,7 @@ class ReservaBase(BaseModel):
 
 
 class ReservaCreate(ReservaBase):
-    pass
+    id_usuario: int | None = None  # El backend lo asigna desde el usuario autenticado
 
 
 class ReservaUpdate(BaseModel):
