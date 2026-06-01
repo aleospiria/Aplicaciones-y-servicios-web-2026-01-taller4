@@ -2,6 +2,15 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../services/api";
 
+function decodeToken(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
+
 function Login() {
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -14,7 +23,9 @@ function Login() {
     try {
       const data = await api.login(correo, contraseña);
       localStorage.setItem("token", data.access_token);
-      navigate("/dashboard");
+      const decoded = decodeToken(data.access_token);
+      if (decoded?.rol) localStorage.setItem("rol", decoded.rol);
+      navigate("/espacios");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión");
     }

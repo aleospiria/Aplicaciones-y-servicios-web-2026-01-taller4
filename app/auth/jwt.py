@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, timezone
+import time
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -19,7 +19,10 @@ security_scheme = HTTPBearer()
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # python-jose requires "sub" to be a string
+    if "sub" in to_encode:
+        to_encode["sub"] = str(to_encode["sub"])
+    expire = int(time.time()) + ACCESS_TOKEN_EXPIRE_MINUTES * 60
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -31,9 +34,10 @@ def get_current_user(
     token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        usuario_id: int = payload.get("sub")
+        usuario_id = payload.get("sub")
         if usuario_id is None:
             raise HTTPException(status_code=401, detail="Token inválido")
+        usuario_id = int(usuario_id)
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
 
