@@ -308,7 +308,7 @@ frontend/
 5. `Navbar` lee el rol de `localStorage` para condicionar los tabs visibles
 
 **Diseño: Bento Box Grid**
-- **Paleta:** Navy `#0F172A` (navbar), Azul CTA `#0369A1` (botones), Fondo `#F8FAFC`
+- **Paleta:** Superficies `#0F172A` (navbar y cards), Azul `#1D4ED8` (botones/accent), Fondo `#020617`, Texto `#F1F5F9`
 - **Layout:** Grid asimétrico de tarjetas (`bento-card`) con sombras suaves y hover elevado
 - **Componentes:** `badge` para estados (warning/success/error), `form-card` para formularios, `reserva-card` para listado
 - **Responsive:** Adaptación a móvil con media queries (navbar colapsable, grid 1 columna)
@@ -332,36 +332,6 @@ frontend/
 | `/admin/aprobar-reservas` | `AprobarReservas.tsx` | Tarjetas de aprobación + historial en tabla |
 
 > La navegación entre vistas de usuario y administrador es automática: el `Navbar` cambia sus tabs según el `rol` almacenado en `localStorage` al iniciar sesión.
-
-**Capturas de pantalla:**
-
-> *Login*
->
-> ![Login](URL_IMAGEN_LOGIN)
->
-> *Espacios disponibles — Bento Box Grid*
->
-> ![Espacios](URL_IMAGEN_ESPACIOS)
->
-> *Crear reserva*
->
-> ![Crear Reserva](URL_IMAGEN_CREAR_RESERVA)
->
-> *Mis reservas*
->
-> ![Mis Reservas](URL_IMAGEN_MIS_RESERVAS)
->
-> *Gestionar espacios — Admin*
->
-> ![Gestionar Espacios](URL_IMAGEN_GESTIONAR_ESPACIOS)
->
-> *Todas las reservas — Admin*
->
-> ![Todas las Reservas](URL_IMAGEN_TODAS_RESERVAS)
->
-> *Aprobar reservas — Admin*
->
-> ![Aprobar Reservas](URL_IMAGEN_APROBAR_RESERVAS)
 
 ### 9. Reglas de negocio implementadas
 
