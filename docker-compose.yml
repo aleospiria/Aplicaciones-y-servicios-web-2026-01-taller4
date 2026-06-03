@@ -20,7 +20,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://reservas:${DB_PASSWORD:-reservas123}@db:5432/reservas
+      DATABASE_URL: postgresql://reservas:${DB_PASSWORD:-reservas123}@db:5432/reservas
       SECRET_KEY: ${SECRET_KEY:-supersecreto-cambiame-en-produccion}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@reservas.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
