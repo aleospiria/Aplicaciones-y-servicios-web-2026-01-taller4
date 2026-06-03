@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from app.db import SessionLocal
+from app.db import SessionLocal, engine, Base
 from app.models import Usuario
 from app.auth.security import hash_password
 
@@ -8,6 +8,7 @@ load_dotenv()
 
 
 def seed_admin():
+    Base.metadata.create_all(bind=engine)
     email = os.getenv("ADMIN_EMAIL", "admin@reservas.com")
     password = os.getenv("ADMIN_PASSWORD", "admin123")
     name = os.getenv("ADMIN_NAME", "Administrador")
