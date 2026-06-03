@@ -1,164 +1,41 @@
-# Gestión de Reservas de Espacios Institucionales
+# Gestión de Reservas — Despliegue con Docker
 
-## Descripción
+Esta rama contiene la configuración para **desplegar** la aplicación completa (backend FastAPI + frontend React + PostgreSQL) usando Docker Compose.
 
-Aplicación web para la gestión de reservas de espacios institucionales (salas de reuniones, laboratorios, auditorios, aulas especiales). Desarrollada con FastAPI + PostgreSQL como parte del Laboratorio 4 de Aplicaciones y Servicios Web.
+## Prerrequisitos
 
----
+- **Ubuntu Server** 22.04+: instalar Docker Engine y Compose:
+  ```bash
+  sudo apt update
+  sudo apt install docker.io -y              # Motor Docker
+  sudo apt install docker-compose-v2 -y      # Plugin compose (V2)
+  ```
+- Puerto **3000** abierto (frontend) y opcionalmente **8000** (Swagger API)
 
-## Organización del Proyecto
+## Estructura
 
-El desarrollo se gestiona mediante **Issues** y **Milestones** en GitHub.
+```
+├── Dockerfile             # Backend (Python + Uvicorn)
+├── Dockerfile.frontend    # Frontend (Node build → Nginx)
+├── docker-compose.yml     # Orquestación de servicios
+├── nginx.conf             # Proxy reverso
+├── .env.example           # Template de variables de entorno
+├── app/
+│   └── seed.py            # Crea admin automáticamente al arrancar
+└── frontend/
+```
 
-### Milestones
+## Variables de entorno
 
-| Milestone | Descripción | Issues |
+| Variable | Default | Descripción |
 |---|---|---|
-| **Backend** | Toda la lógica del servidor: API REST, autenticación JWT, reglas de negocio | #3 al #12 |
-| **Frontend** | Interfaz gráfica: login, CRUD espacios, gestión de reservas | #13 al #15 |
-| **Config/Doc** | Docker, despliegue, READMEs | #16 al #18 |
+| `DB_PASSWORD` | `reservas123` | Contraseña de PostgreSQL |
+| `SECRET_KEY` | `supersecreto-cambiame-en-produccion` | Clave para firmar JWT |
+| `ADMIN_EMAIL` | `admin@reservas.com` | Correo del admin que se crea al iniciar |
+| `ADMIN_PASSWORD` | `admin123` | Contraseña del admin |
+| `ADMIN_NAME` | `Administrador` | Nombre del admin |
 
-### Issues completados
-
-| Issue | Descripción | Estado |
-|---|---|---|
-| #1–#12 | Backend completo (FastAPI + PostgreSQL) | ✅ Cerrado |
-| #13 | Frontend: Login y autenticación | ✅ Cerrado |
-| #14 | Frontend: Vistas de usuario (Espacios, Crear Reserva, Mis Reservas) | ✅ Cerrado |
-| #15 | Frontend: Vistas de administrador (GestionarEspacios, TodasReservas, AprobarReservas) | ✅ Cerrado |
-
----
-
-## Tecnologías
-
-| Herramienta | Versión | Propósito |
-|---|---|---|
-| Python | 3.11 | Lenguaje base (backend) |
-| FastAPI | 0.136.3 | Framework web ASGI |
-| SQLAlchemy | 2.0.50 | ORM para base de datos |
-| PostgreSQL | 17 | Base de datos relacional |
-| Uvicorn | 0.48.0 | Servidor ASGI |
-| python-jose | 3.5.0 | JWT (autenticación) |
-| passlib | 1.7.4 | Hash de contraseñas (bcrypt) |
-| python-dotenv | 1.2.2 | Variables de entorno |
-| bcrypt | 4.1.3 | Algoritmo de hash (pinned) |
-| React | 19 | Frontend — componentes UI |
-| Vite | 8 | Bundler y dev server |
-| TypeScript | 5.8 | Tipado estático |
-| React Router DOM | 7 | Navegación SPA |
-
----
-
-## Estructura del Proyecto
-
-```
-app/
-├── api/                  # Endpoints (routers)
-│   ├── __init__.py
-│   ├── auth.py           # POST /register, POST /login
-│   ├── usuarios.py       # CRUD usuarios (solo admin)
-│   ├── espacios.py       # GET autenticado, POST/PUT/DELETE solo admin
-│   └── reservas.py       # CRUD reservas + reglas de negocio (C–I)
-├── models/               # Modelos ORM
-│   ├── __init__.py
-│   ├── usuario.py        # id, nombre, correo, contraseña, rol
-│   ├── espacio.py        # id, nombre, ubicacion, capacidad, estado
-│   └── reserva.py        # id, FKs, fecha, hora_inicio, hora_fin, asistentes, estado
-├── schemas/              # Esquemas Pydantic
-│   ├── __init__.py
-│   ├── usuario.py
-│   ├── espacio.py
-│   ├── reserva.py
-│   └── auth.py           # LoginRequest, TokenResponse
-├── crud/                 # Operaciones CRUD
-│   ├── __init__.py
-│   ├── usuarios.py
-│   ├── espacios.py
-│   └── reservas.py
-├── auth/                 # Autenticación y autorización
-│   ├── __init__.py
-│   ├── security.py       # hash/verify con bcrypt
-│   ├── jwt.py            # create_access_token, get_current_user
-│   └── roles.py          # admin_required, usuario_required
-├── db.py                 # Engine, SessionLocal, Base, get_db
-├── main.py               # FastAPI app + CORS + routers
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── Navbar.tsx        # Navegación con tabs + logout
-│   │   └── ProtectedRoute.tsx
-│   ├── pages/
-│   │   ├── Login.tsx         # Inicio de sesión
-│   │   ├── Register.tsx      # Registro
-│   │   ├── Espacios.tsx      # Bento-grid de espacios
-│   │   ├── CrearReserva.tsx  # Formulario de reserva
-│   │   └── MisReservas.tsx   # Reservas del usuario
-│   ├── services/
-│   │   └── api.ts            # Cliente HTTP con JWT
-│   ├── App.tsx               # Router
-│   ├── main.tsx              # Entry point
-│   └── index.css             # Bento Box design system
-├── package.json
-└── vite.config.ts            # Proxy al backend
-```
-
----
-
-## Configuración del Entorno de Desarrollo
-
-### 1. Base de datos PostgreSQL
-
-Se utilizó PostgreSQL 17 instalado localmente con pgAdmin para gestión visual.
-
-**Configuración:**
-- Host: `localhost:5432`
-- Base de datos: `reservas_db`
-- Usuario: `postgres`
-
-**.env:**
-```
-DATABASE_URL=postgresql://postgres:password@localhost:5432/reservas_db
-SECRET_KEY=dev-secret-key-change-in-production
-```
-
-### 2. Conexión desde Python (`app/db.py`)
-
-```python
-import os
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/reservas_db")
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-```
-
-### 3. Modelos ORM (`app/models/`)
-
-Tres modelos que reflejan el modelo de datos del laboratorio:
-
-**Usuario**
-| Campo | Tipo | Detalle |
-|---|---|---|
-| id_usuario | Integer | PK, autoincremental |
-| nombre | String(100) | No nulo |
-| correo | String(100) | Único, no nulo |
-| contraseña | String(255) | Hash con bcrypt |
-| rol | String(20) | `admin` o `usuario` (default `usuario`) |
-
+<<<<<<< HEAD
 **Espacio**
 | Campo | Tipo | Detalle |
 |---|---|---|
@@ -398,37 +275,236 @@ Validadas al crear o modificar reservas en `api/reservas.py`:
 ## Cómo ejecutar en modo desarrollo
 
 ### Backend
+=======
+Copia el template y ajusta los valores:
+>>>>>>> 503a7ed (docs: README de ops con instrucciones de despliegue)
 
 ```bash
-# 1. Activar entorno virtual
-.\venv\Scripts\activate
-
-# 2. Instalar dependencias
-pip install -r requirements.txt
-
-# 3. Asegurar PostgreSQL corriendo con la BD reservas_db creada
-
-# 4. Iniciar servidor
-uvicorn app.main:app --reload
+cp .env.example .env
+nano .env
 ```
 
-Documentación automática: `http://localhost:8000/docs`
+> `.env` está en `.gitignore` — **nunca** se sube al repositorio.
 
-### Frontend
+## Despliegue rápido
 
 ```bash
-# 1. Entrar a la carpeta del frontend
-cd frontend
+git clone <url-del-repo> gestion-reservas
+cd gestion-reservas
+git checkout ops
 
-# 2. Instalar dependencias (solo la primera vez)
-npm install
+cp .env.example .env
+nano .env
 
-# 3. Iniciar servidor de desarrollo
-npm run dev
+docker compose up -d --build
 ```
 
-Frontend disponible en: `http://localhost:5173`
+Espera ~10-60s la primera vez (descarga imágenes). Las siguientes son instantáneas.
 
-> El proxy de Vite redirige automáticamente las llamadas a la API al backend (puerto 8000), por lo que no hay conflictos de CORS en desarrollo.
+## Acceso
 
----
+| Servicio | URL |
+|---|---|
+| Frontend | `http://<ip-servidor>:3000` |
+| Swagger API | `http://<ip-servidor>:8000/docs` |
+| Admin por defecto | `admin@reservas.com` / `admin123` |
+
+## Arquitectura
+
+```
+Navegador ──► :3000 ──► Nginx
+                          ├── /, /assets/       → frontend estático (React build)
+                          ├── /auth/*           ──► backend:8000
+                          ├── /usuarios/*       ──► backend:8000
+                          ├── /espacios/*       ──► backend:8000
+                          └── /reservas/*       ──► backend:8000
+                                                    └── db:5432 (PostgreSQL)
+```
+
+Nginx actúa como **proxy reverso**: recibe todas las peticiones en el puerto 3000, sirve los archivos del frontend directamente y reenvía las llamadas a la API al contenedor del backend. El navegador nunca ve al backend directamente, lo que elimina problemas de CORS.
+
+## Admin automático
+
+Al arrancar el backend, `app/seed.py` verifica si existe un usuario con el correo `ADMIN_EMAIL`. Si no existe, lo crea con rol `admin`. Si ya existe, no hace nada.
+
+Esto ocurre **cada vez que el contenedor del backend se inicia**, no solo la primera vez.
+
+## Comandos útiles
+
+```bash
+# Iniciar (construye imágenes si hay cambios)
+docker compose up -d --build
+
+# Ver estado de los servicios
+docker compose ps
+
+# Ver logs en tiempo real
+docker compose logs -f
+
+# Detener sin eliminar (reactivación instantánea)
+docker compose stop
+docker compose start
+
+# Detener y eliminar contenedores (datos BD se conservan)
+docker compose down
+
+# Detener y eliminar TODO, incluyendo datos de la BD
+docker compose down -v
+
+# Backup de la base de datos
+docker compose exec db pg_dump -U reservas reservas > backup.sql
+
+# Restaurar un backup
+cat backup.sql | docker compose exec -T db psql -U reservas reservas
+```
+
+## Dockerfiles
+
+### Backend (`Dockerfile`)
+
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app/ ./app/
+EXPOSE 8000
+CMD ["sh", "-c", "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+```
+
+- Usa `python:3.12-slim` como base (Debian minimalista con Python 3.12)
+- Instala dependencias desde `requirements.txt`
+- Copia todo el código del backend
+- Al arrancar ejecuta `app.seed` (crea admin si no existe) y luego levanta Uvicorn
+
+### Frontend (`Dockerfile.frontend`)
+
+```dockerfile
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN rm -f package-lock.json && npm install
+COPY frontend/ .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+Construcción en dos etapas:
+1. **Builder**: compila el frontend con Node 20 y genera `dist/`
+2. **Producción**: solo toma `dist/` y lo sirve con Nginx (~25 MB final)
+
+## `docker-compose.yml`
+
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: reservas
+      POSTGRES_USER: reservas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-reservas123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reservas -d reservas"]
+      interval: 5s
+      retries: 5
+
+  backend:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://reservas:${DB_PASSWORD:-reservas123}@db:5432/reservas
+      SECRET_KEY: ${SECRET_KEY:-supersecreto-cambiame-en-produccion}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@reservas.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+```
+
+Tres servicios que se comunican por la red interna de Docker:
+- **`db`**: PostgreSQL 16 Alpine con persistencia en el volumen `pgdata`. Expone su puerto solo en `localhost` del servidor para acceso seguro mediante túnel SSH.
+- **`backend`**: FastAPI, construido desde `Dockerfile`. Espera a que `db` esté saludable antes de arrancar.
+- **`frontend`**: Nginx con el build de React, construido desde `Dockerfile.frontend`.
+
+## Red y persistencia
+
+- Los contenedores se comunican mediante la **red interna de Docker** usando los nombres de servicio (`db`, `backend`, `frontend`) como DNS.
+- PostgreSQL guarda sus datos en el volumen **`pgdata`**, que persiste aunque los contenedores se eliminen.
+
+## Puertos utilizados
+
+| Puerto | Servicio | Acceso |
+|---|---|---|
+| `3000` | Frontend (Nginx) | Público — interfaz de usuario |
+| `8000` | Backend (FastAPI) | Público — Swagger y API directa |
+| `5432` | PostgreSQL | **Solo localhost** — acceso mediante túnel SSH |
+
+## Seguridad
+
+1. **Cambia `SECRET_KEY`** en `.env` — es la clave que firma los JWT, si alguien la obtiene puede generar tokens falsos
+2. **Cambia `ADMIN_PASSWORD`** en `.env` — el default (`admin123`) no es seguro para producción
+3. **Cambia `DB_PASSWORD`** en `.env` — no uses el default en un servidor real
+4. PostgreSQL expone su puerto **solo en `127.0.0.1`** del servidor, inaccesible desde la red externa
+5. Para HTTPS real, agrega Certbot + Nginx o un reverse proxy como Caddy o Cloudflare Tunnel
+
+## Acceso seguro a la base de datos (túnel SSH)
+
+PostgreSQL solo escucha en `localhost` del servidor. Para conectarte con pgAdmin desde tu PC sin exponer el puerto a la red, usa un **túnel SSH**:
+
+### Desde Windows (PowerShell)
+
+```powershell
+ssh -L 5433:localhost:5432 aleospiria@<ip-del-servidor>
+```
+
+| Parámetro | Significado |
+|---|---|
+| `-L 5433:localhost:5432` | Puerto `5433` de tu PC → `localhost:5432` del servidor |
+| `aleospiria` | Tu usuario SSH en el servidor |
+| `<ip-del-servidor>` | IP del servidor Ubuntu |
+
+Mantén esa terminal abierta. Luego en pgAdmin crea una conexión a:
+
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Port | `5433` |
+| Database | `reservas` |
+| User | `reservas` |
+| Password | El valor de `DB_PASSWORD` del `.env` del servidor |
+
+Al cerrar la terminal SSH, el túnel se corta automáticamente.
+
+## Solución de errores comunes
+
+| Error | Causa | Solución |
+|---|---|---|
+| `502 Bad Gateway` | Backend no responde | `docker compose logs backend` para ver el error |
+| `relation "usuarios" does not exist` | Seed se ejecuta antes de crear tablas | Agregar `Base.metadata.create_all()` al inicio de `seed_admin()` |
+| `ModuleNotFoundError: No module named 'asyncpg'` | DATABASE_URL usa driver async | Usar `postgresql://` (sync con psycopg2) en vez de `postgresql+asyncpg://` |
+| `npm ci` falla con lock desincronizado | Lock file generado en otro SO | Cambiar a `rm -f package-lock.json && npm install` en el Dockerfile |
+| `@rolldown/binding` no encontrado | Binding nativo incompatible con la arquitectura | Usar `node:20-slim` en vez de `node:20-alpine` |
+| `Permission denied` al exponer puerto | Puerto local ocupado | Usar otro puerto local (ej. `5433` en vez de `5432`) |
