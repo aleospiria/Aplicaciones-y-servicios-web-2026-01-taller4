@@ -35,7 +35,6 @@ Esta rama contiene la configuración para **desplegar** la aplicación completa 
 | `ADMIN_PASSWORD` | `admin123` | Contraseña del admin |
 | `ADMIN_NAME` | `Administrador` | Nombre del admin |
 
-<<<<<<< HEAD
 **Espacio**
 | Campo | Tipo | Detalle |
 |---|---|---|
@@ -275,9 +274,7 @@ Validadas al crear o modificar reservas en `api/reservas.py`:
 ## Cómo ejecutar en modo desarrollo
 
 ### Backend
-=======
-Copia el template y ajusta los valores:
->>>>>>> 503a7ed (docs: README de ops con instrucciones de despliegue)
+
 
 ```bash
 cp .env.example .env
