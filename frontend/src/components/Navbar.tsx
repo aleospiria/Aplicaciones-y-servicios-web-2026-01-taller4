@@ -18,6 +18,7 @@ function Navbar() {
 
   const adminTabs = [
     { path: "/admin/gestionar-espacios", label: "Gestionar Espacios" },
+    { path: "/admin/gestionar-usuarios", label: "Gestionar Usuarios" },
     { path: "/admin/todas-reservas", label: "Todas las Reservas" },
     { path: "/admin/aprobar-reservas", label: "Aprobar Reservas" },
   ];

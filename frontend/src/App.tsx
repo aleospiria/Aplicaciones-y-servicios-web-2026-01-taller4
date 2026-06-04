@@ -7,6 +7,7 @@ import MisReservas from "./pages/MisReservas";
 import GestionarEspacios from "./pages/GestionarEspacios";
 import TodasReservas from "./pages/TodasReservas";
 import AprobarReservas from "./pages/AprobarReservas";
+import GestionarUsuarios from "./pages/GestionarUsuarios";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -60,6 +61,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AprobarReservas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/gestionar-usuarios"
+          element={
+            <ProtectedRoute>
+              <GestionarUsuarios />
             </ProtectedRoute>
           }
         />

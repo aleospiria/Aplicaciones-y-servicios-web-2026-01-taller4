@@ -45,6 +45,9 @@ export const api = {
 
   getUsuarios: () => request("/usuarios/"),
 
+  createUsuario: (data: { nombre: string; correo: string; contraseña: string; rol?: string }) =>
+    request("/usuarios/", { method: "POST", body: JSON.stringify(data) }),
+
   createEspacio: (data: unknown) =>
     request("/espacios/", { method: "POST", body: JSON.stringify(data) }),
 
