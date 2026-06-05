@@ -52,7 +52,7 @@ Desarrollar y desplegar una aplicación web funcional integrando frontend (React
 
 | Integrante | Rol |
 |---|---|
-| **Alejo Spiria** | Desarrollador full-stack, DevOps y documentación |
+| **Victor Aristizabal** | Desarrollador full-stack, DevOps y documentación |
 
 > Proyecto desarrollado de forma individual como parte del Laboratorio 4 de Aplicaciones y Servicios Web.
 
@@ -134,7 +134,7 @@ docker compose down
 docker compose down -v
 ```
 
-> Para más detalle sobre el despliegue, consultar la rama [`ops`](https://github.com/aleospiria/gestion-reservas/tree/ops).
+> Para más detalle sobre el despliegue, consultar la rama [`ops`](https://github.com/aleospiria/Aplicaciones-y-servicios-web-2026-01-taller4/tree/ops).
 
 ---
 
@@ -175,9 +175,9 @@ docker compose down -v
 
 ### Inicio de Sesión
 
-> **Pantalla de inicio de sesión con diseño dividido.** A la izquierda un panel institucional con el nombre de la aplicación y una ilustración SVG; a la derecha el formulario con campos de correo y contraseña.
+> **Pantalla de inicio de sesión con diseño dividido.** El formulario con campos de correo y contraseña.
 
-![Login](screenshots/login.png)
+![Login](screenshots/login.jpg)
 
 **Pasos:**
 1. Ingresa tu **correo electrónico** registrado
@@ -319,7 +319,6 @@ La tabla incluye:
 
 > El sistema muestra **mensajes claros** cuando una reserva no cumple las reglas de negocio, tanto en el frontend (toast/notificación) como en el backend (respuesta JSON con código HTTP 400/422).
 
-![Mensaje de error](screenshots/error-reserva.png)
 
 **Ejemplos de mensajes:**
 
@@ -337,8 +336,6 @@ La tabla incluye:
 ### Cierre de Sesión
 
 > El botón de **"Cerrar Sesión"** se encuentra en la barra de navegación superior.
-
-![Cerrar sesión](screenshots/cerrar-sesion.png)
 
 Al hacer clic:
 1. El token JWT se elimina del `localStorage`
@@ -535,8 +532,8 @@ Precondición: Usuario autenticado, espacio activo
 
 Este README corresponde a la rama `main` (informe final y manual de usuario).
 
-- **Documentación técnica:** [`dev`](https://github.com/aleospiria/gestion-reservas/tree/dev)
-- **Documentación de despliegue:** [`ops`](https://github.com/aleospiria/gestion-reservas/tree/ops)
+- **Documentación técnica:** [`dev`](https://github.com/aleospiria/Aplicaciones-y-servicios-web-2026-01-taller4/tree/dev)
+- **Documentación de despliegue:** [`ops`](https://github.com/aleospiria/Aplicaciones-y-servicios-web-2026-01-taller4/tree/ops)
 
 ---
 
